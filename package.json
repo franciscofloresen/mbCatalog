@@ -1,0 +1,15 @@
+{
+  "name": "mbWeb",
+  "version": "1.0.0",
+  "description": "Med & Beauty - Distribuidora de productos estéticos",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node scripts/migrate-csv.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  }
+}
