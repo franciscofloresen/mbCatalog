@@ -48,9 +48,9 @@ resource "aws_cloudfront_distribution" "main" {
     max_ttl     = 31536000
   }
 
-  # Behavior para imágenes
+  # Behavior para imágenes de productos
   ordered_cache_behavior {
-    path_pattern           = "/images/*"
+    path_pattern           = "/products/*"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "S3Images"
