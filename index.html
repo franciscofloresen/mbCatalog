@@ -437,8 +437,8 @@
 
     async function fetchProducts() {
         try {
-            // Cargar desde archivo JSON local (después será API Gateway)
-            const res = await fetch('data/products.json');
+            const apiUrl = window.MB_CONFIG?.API_ENDPOINT || 'https://nf9mctqixl.execute-api.us-east-1.amazonaws.com';
+            const res = await fetch(`${apiUrl}/products`);
             PRODUCTS = await res.json();
             
             populateFilters(PRODUCTS);
