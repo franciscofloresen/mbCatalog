@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo | Med & Beauty</title>
+  <link rel="icon" href="/products/medAndBeautyLogo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: { DEFAULT: '#c5a560', hover: '#b08d45' }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div id="app"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
