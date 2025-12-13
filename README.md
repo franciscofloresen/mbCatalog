@@ -13,6 +13,20 @@ Sitio web de catálogo de productos de medicina estética hosteado en AWS.
 
 ---
 
+## 📝 Requerimientos Funcionales
+
+1. **Catálogo de productos** - Solo visualización, sin sistema de ventas
+2. **Sistema de usuarios** - Autenticación con Cognito
+3. **Control de precios** - Los precios son visibles SOLO para administradores, no para el público general
+
+### Roles de Usuario
+| Rol | Permisos |
+|-----|----------|
+| **Público** | Ver productos (sin precios) |
+| **Admin** | Ver productos con precios, gestionar catálogo |
+
+---
+
 ## 🏗️ Arquitectura Propuesta (AWS Well-Architected)
 
 ```

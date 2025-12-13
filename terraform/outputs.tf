@@ -45,3 +45,8 @@ output "cloudfront_domain" {
 output "website_url" {
   value = "https://${var.domain_name}"
 }
+
+# API Gateway
+output "api_endpoint" {
+  value = aws_apigatewayv2_api.main.api_endpoint
+}
