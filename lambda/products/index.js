@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -11,9 +11,7 @@ const headers = {
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',
 };
 
-// Verifica si es ruta admin o si el usuario tiene grupo admin
 const isAdmin = (event) => {
-  // Ruta /products/admin requiere auth
   if (event.rawPath?.includes('/admin')) {
     const groups = event.requestContext?.authorizer?.jwt?.claims?.['cognito:groups'] || '';
     return groups.includes('admin');
@@ -21,7 +19,6 @@ const isAdmin = (event) => {
   return false;
 };
 
-// Remueve el precio si no es admin
 const filterPrice = (item, showPrice) => {
   if (showPrice) return item;
   const { price, ...rest } = item;
@@ -29,33 +26,86 @@ const filterPrice = (item, showPrice) => {
 };
 
 exports.handler = async (event) => {
-  const method = event.httpMethod;
+  const method = event.requestContext?.http?.method || event.httpMethod;
+  const path = event.rawPath || event.path;
   const productId = event.pathParameters?.productId;
   const showPrice = isAdmin(event);
 
   try {
+    // GET /products o /products/admin
+    if (method === 'GET' && !productId) {
+      const { Items } = await docClient.send(new ScanCommand({
+        TableName: TABLE_NAME,
+        FilterExpression: 'is_active = :active',
+        ExpressionAttributeValues: { ':active': 'true' }
+      }));
+      const products = Items.map(item => filterPrice(item, showPrice));
+      return { statusCode: 200, headers, body: JSON.stringify(products) };
+    }
+
+    // GET /products/{productId}
     if (method === 'GET' && productId) {
-      // GET /products/{productId}
       const { Item } = await docClient.send(new GetCommand({
         TableName: TABLE_NAME,
         Key: { product_id: productId }
       }));
-      
-      if (!Item) {
-        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Producto no encontrado' }) };
-      }
+      if (!Item) return { statusCode: 404, headers, body: JSON.stringify({ error: 'No encontrado' }) };
       return { statusCode: 200, headers, body: JSON.stringify(filterPrice(Item, showPrice)) };
     }
 
-    // GET /products
-    const { Items } = await docClient.send(new ScanCommand({
-      TableName: TABLE_NAME,
-      FilterExpression: 'is_active = :active',
-      ExpressionAttributeValues: { ':active': 'true' }
-    }));
+    // Solo admin puede crear/editar/eliminar
+    if (!isAdmin(event)) {
+      return { statusCode: 403, headers, body: JSON.stringify({ error: 'No autorizado' }) };
+    }
 
-    const products = Items.map(item => filterPrice(item, showPrice));
-    return { statusCode: 200, headers, body: JSON.stringify(products) };
+    // POST /products/admin - Crear producto
+    if (method === 'POST') {
+      const body = JSON.parse(event.body);
+      const item = {
+        product_id: body.product_id || `prod-${Date.now()}`,
+        name: body.name,
+        brand: body.brand || '',
+        price: body.price,
+        volume: body.volume || '',
+        stock: body.stock || 0,
+        image_url: body.image_url || '',
+        is_active: 'true',
+        created_at: new Date().toISOString().split('T')[0]
+      };
+      await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
+      return { statusCode: 201, headers, body: JSON.stringify(item) };
+    }
+
+    // PUT /products/admin/{productId} - Actualizar producto
+    if (method === 'PUT' && productId) {
+      const body = JSON.parse(event.body);
+      const { Item: existing } = await docClient.send(new GetCommand({
+        TableName: TABLE_NAME,
+        Key: { product_id: productId }
+      }));
+      if (!existing) return { statusCode: 404, headers, body: JSON.stringify({ error: 'No encontrado' }) };
+      
+      const item = { ...existing, ...body, product_id: productId };
+      await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
+      return { statusCode: 200, headers, body: JSON.stringify(item) };
+    }
+
+    // DELETE /products/admin/{productId} - Eliminar (soft delete)
+    if (method === 'DELETE' && productId) {
+      const { Item: existing } = await docClient.send(new GetCommand({
+        TableName: TABLE_NAME,
+        Key: { product_id: productId }
+      }));
+      if (!existing) return { statusCode: 404, headers, body: JSON.stringify({ error: 'No encontrado' }) };
+      
+      await docClient.send(new PutCommand({
+        TableName: TABLE_NAME,
+        Item: { ...existing, is_active: 'false' }
+      }));
+      return { statusCode: 200, headers, body: JSON.stringify({ message: 'Eliminado' }) };
+    }
+
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Método no soportado' }) };
 
   } catch (error) {
     console.error('Error:', error);

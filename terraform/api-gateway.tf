@@ -5,7 +5,7 @@ resource "aws_apigatewayv2_api" "main" {
 
   cors_configuration {
     allow_origins = ["https://${var.domain_name}", "https://www.${var.domain_name}", "http://localhost:3000"]
-    allow_methods = ["GET", "OPTIONS"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allow_headers = ["Content-Type", "Authorization"]
     max_age       = 86400
   }
@@ -47,4 +47,29 @@ resource "aws_apigatewayv2_stage" "prod" {
     throttling_burst_limit = 100
     throttling_rate_limit  = 50
   }
+}
+
+# CRUD Admin routes
+resource "aws_apigatewayv2_route" "post_product" {
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "POST /products/admin"
+  target             = "integrations/${aws_apigatewayv2_integration.products.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+}
+
+resource "aws_apigatewayv2_route" "put_product" {
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "PUT /products/admin/{productId}"
+  target             = "integrations/${aws_apigatewayv2_integration.products.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+}
+
+resource "aws_apigatewayv2_route" "delete_product" {
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "DELETE /products/admin/{productId}"
+  target             = "integrations/${aws_apigatewayv2_integration.products.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }

@@ -26,7 +26,7 @@ resource "aws_iam_role_policy" "lambda" {
       },
       {
         Effect = "Allow"
-        Action = ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:Query"]
+        Action = ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"]
         Resource = aws_dynamodb_table.products.arn
       }
     ]
