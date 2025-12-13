@@ -13,3 +13,8 @@ variable "project" {
 variable "environment" {
   default = "production"
 }
+
+variable "alert_email" {
+  description = "Email para alertas de budget y monitoreo"
+  default     = "admin@distribuidoramedandbeauty.com"
+}

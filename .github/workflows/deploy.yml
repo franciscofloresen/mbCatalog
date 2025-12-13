@@ -1,0 +1,56 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  WEBSITE_BUCKET: mb-website-6af92cdb
+  CLOUDFRONT_DIST_ID: E3HFFWGGX54X6N
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./frontend s3://${{ env.WEBSITE_BUCKET }} --delete
+          aws s3 cp ./index.html s3://${{ env.WEBSITE_BUCKET }}/
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_DIST_ID }} \
+            --paths "/*"
+
+  deploy-lambda:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[lambda]') || contains(github.event.head_commit.message, '[all]')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package and deploy Lambda
+        run: |
+          cd lambda/products
+          zip -r ../products.zip .
+          aws lambda update-function-code \
+            --function-name mb-products \
+            --zip-file fileb://../products.zip
