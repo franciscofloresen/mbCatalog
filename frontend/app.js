@@ -31,9 +31,10 @@ async function login(email, password) {
         resolve({ success: true, isAdmin });
       },
       onFailure: (err) => reject(err),
-      newPasswordRequired: (userAttributes) => {
+      newPasswordRequired: (userAttributes, requiredAttributes) => {
         delete userAttributes.email_verified;
-        cognitoUser.completeNewPasswordChallenge(password, userAttributes, {
+        delete userAttributes.email;
+        cognitoUser.completeNewPasswordChallenge(password, {}, {
           onSuccess: (result) => {
             currentUser = cognitoUser;
             const idToken = result.getIdToken().getJwtToken();
