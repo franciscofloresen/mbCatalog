@@ -50,3 +50,12 @@ output "website_url" {
 output "api_endpoint" {
   value = aws_apigatewayv2_api.main.api_endpoint
 }
+
+# Cognito
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.main.id
+}
+
+output "cognito_client_id" {
+  value = aws_cognito_user_pool_client.web.id
+}

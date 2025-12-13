@@ -11,14 +11,14 @@ const headers = {
   'Access-Control-Allow-Headers': 'Content-Type,Authorization',
 };
 
-// Verifica si el usuario es admin basado en los grupos de Cognito
+// Verifica si es ruta admin o si el usuario tiene grupo admin
 const isAdmin = (event) => {
-  try {
-    const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'];
-    return groups?.includes('admin');
-  } catch {
-    return false;
+  // Ruta /products/admin requiere auth
+  if (event.rawPath?.includes('/admin')) {
+    const groups = event.requestContext?.authorizer?.jwt?.claims?.['cognito:groups'] || '';
+    return groups.includes('admin');
   }
+  return false;
 };
 
 // Remueve el precio si no es admin
