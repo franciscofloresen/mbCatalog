@@ -472,7 +472,7 @@
         }
 
         grid.innerHTML = products.map(p => {
-            const price = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(p.price);
+            const price = p.price ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(p.price) : '';
             const hasStock = p.stock > 0;
             const imgUrl = p.image_url || 'https://placehold.co/400x400/fafafa/e0e0e0?text=MB';
 
@@ -492,9 +492,7 @@
                         <span class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">${p.brand}</span>
                         <h3 class="font-serif text-lg text-dark mb-2 leading-tight group-hover:text-gold transition-colors line-clamp-2">${p.name}</h3>
                         <p class="text-xs text-gray-400 mb-2">${p.volume || ''}</p>
-                        <div class="mt-auto pt-2 border-t border-gray-50 w-full">
-                            <span class="text-dark font-medium">${price}</span>
-                        </div>
+                        ${price ? `<div class="mt-auto pt-2 border-t border-gray-50 w-full"><span class="text-dark font-medium">${price}</span></div>` : ''}
                     </div>
                 </div>`;
         }).join('');
