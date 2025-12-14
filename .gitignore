@@ -21,3 +21,4 @@ terraform/.terraform.lock.hcl
 .env
 .env.local
 index_backup.html
+frontend/videos/
