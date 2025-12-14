@@ -20,3 +20,4 @@ terraform/.terraform.lock.hcl
 # Environment
 .env
 .env.local
+index_backup.html
