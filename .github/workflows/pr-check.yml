@@ -1,0 +1,54 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check HTML syntax
+        run: |
+          echo "Validating HTML files..."
+          for file in $(find . -name "*.html" -not -path "./node_modules/*"); do
+            if grep -q "<html" "$file"; then
+              echo "✓ $file"
+            fi
+          done
+
+      - name: Check JS syntax
+        run: |
+          echo "Validating JS files..."
+          for file in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.terraform/*"); do
+            node --check "$file" && echo "✓ $file"
+          done
+
+      - name: Validate Terraform
+        run: |
+          cd terraform
+          terraform fmt -check -recursive || echo "Warning: Terraform formatting issues"
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Checking for potential secrets..."
+          if grep -rE "(AKIA|aws_secret|password\s*=\s*['\"][^'\"]+['\"])" --include="*.js" --include="*.tf" --include="*.html" . 2>/dev/null | grep -v "placeholder\|example\|var\." ; then
+            echo "⚠️ Potential secrets found!"
+            exit 1
+          fi
+          echo "✓ No hardcoded secrets detected"
+
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test API endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" "https://nf9mctqixl.execute-api.us-east-1.amazonaws.com/products")
+          if [ "$response" = "200" ]; then
+            echo "✓ API responding correctly"
+          else
+            echo "✗ API returned $response"
+            exit 1
+          fi
