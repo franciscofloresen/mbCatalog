@@ -7,7 +7,7 @@ Sitio web de catálogo de productos de medicina estética hosteado en AWS.
 | Recurso | URL |
 |---------|-----|
 | **Sitio Web** | https://distribuidoramedandbeauty.com |
-| **Catálogo** | https://distribuidoramedandbeauty.com/catalog.html |
+| **Catálogo Admin** | https://distribuidoramedandbeauty.com/catalog.html |
 | **API** | https://nf9mctqixl.execute-api.us-east-1.amazonaws.com |
 | **Repositorio** | https://github.com/franciscofloresen/mbCatalog |
 
@@ -31,6 +31,7 @@ Sitio web de catálogo de productos de medicina estética hosteado en AWS.
 - ✅ **Control de precios** - Precios visibles SOLO para administradores
 - ✅ **Login para Admin** - Autenticación JWT
 - ✅ **CRUD de productos** - Agregar/Editar/Eliminar (solo admin)
+- ✅ **Buscador** - Búsqueda por nombre y marca
 
 ### Roles de Usuario
 | Rol | Permisos |
@@ -80,9 +81,9 @@ Sitio web de catálogo de productos de medicina estética hosteado en AWS.
 ```
 mbWeb/
 ├── README.md
-├── index.html              # Landing page
+├── index.html              # Landing page con video hero
 ├── frontend/
-│   ├── catalog.html        # Catálogo de productos
+│   ├── catalog.html        # Catálogo con login admin
 │   ├── app.js              # Lógica del frontend
 │   └── config.js           # Configuración (generado por Terraform)
 ├── lambda/
@@ -98,10 +99,12 @@ mbWeb/
 │   ├── lambda.tf           # Lambda function
 │   ├── api-gateway.tf      # API REST
 │   ├── cognito.tf          # Autenticación
-│   └── monitoring.tf       # CloudWatch + Budget
+│   ├── monitoring.tf       # CloudWatch + Budget
+│   └── frontend-config.tf  # Genera config.js
 └── .github/
     └── workflows/
-        └── deploy.yml      # CI/CD
+        ├── deploy.yml      # CI/CD (push a main)
+        └── pr-check.yml    # Validación de PRs
 ```
 
 ---
@@ -121,16 +124,26 @@ mbWeb/
 
 ## 🚀 Despliegue
 
-### CI/CD Automático
-Push a `main` despliega automáticamente el frontend.
+### Ramas
+| Rama | Propósito |
+|------|-----------|
+| `main` | Producción - deploy automático |
+| `test` | Desarrollo - requiere PR para merge |
 
+### CI/CD Automático
 ```bash
-# Solo frontend
+# Solo frontend (push directo a main)
 git push origin main
 
 # Frontend + Lambda
 git commit -m "mensaje [lambda]"
 git push origin main
+
+# Desde test (requiere PR)
+git checkout test
+# hacer cambios...
+git push origin test
+# Crear PR en GitHub → main
 ```
 
 ### Manual
@@ -162,7 +175,7 @@ aws cloudfront create-invalidation --distribution-id E3HFFWGGX54X6N --paths "/*"
 ## 📊 Monitoreo
 
 - **CloudWatch Alarms**: Lambda errors, API 5xx
-- **Budget Alert**: $5 USD/mes
+- **Budget Alert**: $5 USD/mes (80% forecast, 100% actual)
 - **DynamoDB PITR**: Backups habilitados
 
 ---
@@ -171,7 +184,7 @@ aws cloudfront create-invalidation --distribution-id E3HFFWGGX54X6N --paths "/*"
 
 | Servicio | Recurso |
 |----------|---------|
-| DynamoDB | mb_products, mb_users |
+| DynamoDB | mb_products |
 | S3 | mb-website-6af92cdb, mb-product-images-6af92cdb |
 | CloudFront | E3HFFWGGX54X6N |
 | Lambda | mb-products |

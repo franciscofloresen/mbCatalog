@@ -186,6 +186,10 @@
 
     <!-- Brands Ticker -->
     <section id="marcas" class="py-10 bg-white border-b border-gray-100 overflow-hidden relative z-20">
+        <style>
+            @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+            .brands-track { animation: marquee 20s linear infinite; }
+        </style>
         <div class="brands-wrapper relative flex w-full">
             <div class="brands-track flex items-center gap-20 px-4" id="brands-track">
                 <!-- JS will populate -->
@@ -351,7 +355,6 @@
                 <img src="${src}" class="max-w-full max-h-full object-contain">
             </div>
         `).join('');
-        track.style.animation = 'scroll 30s linear infinite';
     }
 
     async function fetchProducts() {
