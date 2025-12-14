@@ -222,11 +222,7 @@
                         </select>
                     </div>
                 </div>
-                <select id="sort-by" class="bg-transparent hover:text-gold transition-colors cursor-pointer outline-none">
-                    <option value="relevancia">Relevancia</option>
-                    <option value="precio_asc">Precio: Bajo - Alto</option>
-                    <option value="precio_desc">Precio: Alto - Bajo</option>
-                </select>
+
             </div>
 
             <!-- Product Grid -->
@@ -442,26 +438,15 @@
 
     function setupFilters(allProducts) {
         const brandSelect = document.getElementById('brand-filter');
-        const sortSelect = document.getElementById('sort-by');
 
-        const apply = () => {
-            let filtered = [...allProducts];
-
-            if(brandSelect && brandSelect.value !== 'todos') {
-                filtered = filtered.filter(p => p.brand === brandSelect.value);
-            }
-
-            if(sortSelect) {
-                const sort = sortSelect.value;
-                if(sort === 'precio_asc') filtered.sort((a,b) => (a.price||0) - (b.price||0));
-                if(sort === 'precio_desc') filtered.sort((a,b) => (b.price||0) - (a.price||0));
-            }
-
-            renderProducts(filtered);
-        };
-
-        if(brandSelect) brandSelect.addEventListener('change', apply);
-        if(sortSelect) sortSelect.addEventListener('change', apply);
+        if(brandSelect) {
+            brandSelect.addEventListener('change', () => {
+                let filtered = brandSelect.value === 'todos' 
+                    ? allProducts 
+                    : allProducts.filter(p => p.brand === brandSelect.value);
+                renderProducts(filtered);
+            });
+        }
     }
 </script>
 </body>
