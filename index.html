@@ -210,19 +210,14 @@
             </div>
 
             <!-- Filters -->
-            <div class="flex justify-center mb-12 flex-wrap gap-6 text-sm uppercase tracking-wider text-gray-400 font-medium">
+            <div class="flex justify-center mb-12 flex-wrap gap-6 text-sm uppercase tracking-wider text-gray-400 font-medium items-center">
                 <button class="filter-btn text-dark border-b-2 border-gold pb-1" data-filter="todos">Todo</button>
-                <div class="relative group">
-                    <button class="hover:text-gold transition-colors flex items-center gap-1">
-                        Marca <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                    </button>
-                    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white shadow-xl p-2 rounded-sm hidden group-hover:block z-20 border border-gray-100">
-                        <select id="brand-filter" class="w-full p-2 text-gray-600 bg-transparent outline-none cursor-pointer">
-                            <option value="todos">Todas las marcas</option>
-                        </select>
-                    </div>
+                <div class="relative">
+                    <select id="brand-filter" class="appearance-none bg-transparent hover:text-gold transition-colors cursor-pointer outline-none pr-5 uppercase tracking-wider font-medium">
+                        <option value="todos">Marca</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down text-[10px] absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                 </div>
-
             </div>
 
             <!-- Product Grid -->
