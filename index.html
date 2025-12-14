@@ -477,30 +477,22 @@
     function setupFilters(allProducts) {
         const brandSelect = document.getElementById('brand-filter');
         const sortSelect = document.getElementById('sort-by');
-        const searchInput = document.getElementById('search-input');
 
         const apply = () => {
             let filtered = [...allProducts];
-
-            const term = searchInput.value.toLowerCase();
-            if(term) filtered = filtered.filter(p => 
-                p.name.toLowerCase().includes(term) || 
-                p.brand.toLowerCase().includes(term)
-            );
 
             const brand = brandSelect.value;
             if(brand !== 'todos') filtered = filtered.filter(p => p.brand === brand);
 
             const sort = sortSelect.value;
-            if(sort === 'precio_asc') filtered.sort((a,b) => a.price - b.price);
-            if(sort === 'precio_desc') filtered.sort((a,b) => b.price - a.price);
+            if(sort === 'precio_asc') filtered.sort((a,b) => (a.price || 0) - (b.price || 0));
+            if(sort === 'precio_desc') filtered.sort((a,b) => (b.price || 0) - (a.price || 0));
 
             renderProducts(filtered);
         };
 
         brandSelect.addEventListener('change', apply);
         sortSelect.addEventListener('change', apply);
-        searchInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') apply(); });
     }
 
     function showProductDetail(productId) {
